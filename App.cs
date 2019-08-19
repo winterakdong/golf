@@ -33,7 +33,7 @@ namespace Golf
 
     {
       Console.WriteLine($"{ActiveCourse} ");
-      Console.WriteLine(Por);
+      Console.WriteLine();
 
     }
     public void GetScore()
