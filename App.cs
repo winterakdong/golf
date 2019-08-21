@@ -10,7 +10,6 @@ namespace Golf
     public App(Course activeCourse)
     {
       this.ActiveCourse = activeCourse;
-
     }
 
     public Course ActiveCourse { get; set; }
@@ -30,41 +29,93 @@ namespace Golf
     }
 
     public void DisplayPlayerResults()
-
     {
-      Console.WriteLine($"{ActiveCourse} ");
-      Console.WriteLine();
+      Console.Clear();
+      Console.WriteLine(ActiveCourse.Name);
 
+      // Display Par
+      // Console.Write("Par: \t\t");
+      // foreach (IHole hole in ActiveCourse.Holes)
+      // {
+      //   Console.Write();
+      // }
+
+      // Display Results for each player
+      foreach (IPlayer player in Players)
+      {
+        Console.Write(player.Name + ":\t\t");
+        foreach (int score in player.Scores)
+        {
+          Console.Write(score + " ");
+        }
+        int totalScore = player.DisplayFinalScore();
+        Console.WriteLine("\t|| Total Score: " + totalScore);
+      }
+
+      int lowestScore = int.MaxValue;
+      bool ifTied = false;
+      foreach (IPlayer player in Players)
+      {
+        if (player.DisplayFinalScore() < lowestScore)
+        {
+          lowestScore = player.DisplayFinalScore();
+        }
+        else if (player.DisplayFinalScore() == lowestScore)
+        {
+          ifTied = true;
+        }
+      }
+
+      if (ifTied)
+      {
+        Console.WriteLine("Winners: ");
+        int index = 0;
+        foreach (IPlayer player in Players)
+        {
+          if (player.DisplayFinalScore() == lowestScore && index == 0)
+          {
+            Console.Write(player.Name);
+            index++;
+          }
+          else if (player.DisplayFinalScore() == lowestScore)
+          {
+            Console.Write(", " + player.Name);
+          }
+        }
+      }
+      else
+      {
+        Console.WriteLine("Winner: ");
+        foreach (IPlayer player in Players)
+        {
+          if (player.DisplayFinalScore() == lowestScore)
+          {
+            Console.Write(player.Name);
+          }
+        }
+      }
     }
     public void GetScore()
     {
-      bool valScore = false;
+      // bool valScore = false;
       Console.Clear();
-      for (int i = 1; i <= 9; i++)
+      for (int i = 1; i <= ActiveCourse.Holes.Count; i++)
       {
+        Console.Clear();
         Console.WriteLine($"Hole {i}");
         foreach (IPlayer player in Players)
         {
-          while (valScore == false)
+          Console.WriteLine("Strokes for " + player.Name + " >");
+
+          int score = 0;
+
+          while (!int.TryParse(Console.ReadLine(), out score) || score <= 0)
           {
-            Console.WriteLine($"Strokes for {Players}");
-            string scoreS = Console.ReadLine();
-            if (int.Parse(scoreS.ToString()).GetType().Equals(typeof(int)))
-            {
-              int score = Int32.Parse(scoreS);
-              player.Scores.Add(score);
-              valScore = true;
-              break;
-            }
-            else
-            {
-              Console.WriteLine("Please enter valid number!");
-              valScore = false;
-            }
+            Console.WriteLine("Invalid input. Please enter a valid numerical value.\n");
+            Console.WriteLine("Strokes for " + player.Name + " >");
           }
+          player.Scores.Add(score);
         }
-
-
       }
     }
     public void Greeting()
@@ -86,6 +137,19 @@ namespace Golf
         SetPlayers();
         GetScore();
         DisplayPlayerResults();
+
+        Console.WriteLine("\nPress (q) to quit, or any other key to create a new game.");
+        switch (Console.ReadLine())
+        {
+          case "q":
+            continueGame = false;
+            Console.Clear();
+            break;
+          default:
+            Console.Clear();
+            Setup();
+            break;
+        }
       }
 
       // TODO "playing the game"
@@ -97,51 +161,50 @@ namespace Golf
 
     public void SelectCourse()
     {
-      switch (Console.ReadLine())
+      bool validSelection = true;
+      do
       {
-        case "1":
-          ActiveCourse = Courses[0];
-          break;
-        case "2":
-          ActiveCourse = Courses[1];
-          break;
-        case "3":
-          ActiveCourse = Courses[2];
-          break;
-        default:
-          Console.WriteLine("Invalid Entry");
-          break;
-
-      }
-
-      Console.WriteLine($"Thanks for choosing {ActiveCourse.Name}");
+        String str = Console.ReadLine();
+        switch (str)
+        {
+          case "1":
+            ActiveCourse = Courses[0];
+            validSelection = true;
+            break;
+          case "2":
+            ActiveCourse = Courses[1];
+            validSelection = true;
+            break;
+          case "3":
+            ActiveCourse = Courses[2];
+            validSelection = true;
+            break;
+          default:
+            Console.WriteLine("Invalid selection. Please try again.");
+            validSelection = false;
+            break;
+        }
+      } while (validSelection == false);
     }
 
     public void SetPlayers()
     {
-      bool valNumPlayer = false;
-      while (valNumPlayer == false)
+      Console.Clear();
+      Console.WriteLine("You chose {ActiveCourse.Name}." + "\nHow many players? >");
+
+      int playerCount = 0;
+      while (!int.TryParse(Console.ReadLine(), out playerCount) || playerCount <= 0)
       {
-        Console.WriteLine("How many players?");
-        string playerNum = Console.ReadLine();
-        if (int.Parse(playerNum.ToString()).GetType().Equals(typeof(int)))
-        {
-          int iPlayer = Int32.Parse(playerNum);
-          for (int i = 1; i <= iPlayer; i++)
-          {
-            Console.WriteLine($"Player {i} Name >");
-            string name = Console.ReadLine();
-            Player player = new Player(name);
-            Players.Add(player);
-          }
-          valNumPlayer = true;
-          break;
-        }
-        else
-        {
-          Console.WriteLine("Please enter valid number!");
-          valNumPlayer = true;
-        }
+        Console.WriteLine("Invalid input. Please enter a valid numerical value.\n");
+        Console.WriteLine("How many players? >");
+      }
+
+      for (int i = 1; i <= playerCount; i++)
+      {
+        Console.WriteLine($"Player {i} Name >");
+        string name = Console.ReadLine();
+        Player player = new Player(name);
+        Players.Add(player);
       }
     }
 
